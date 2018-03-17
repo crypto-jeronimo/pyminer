@@ -50,8 +50,9 @@ VERSION = [0, 1]
 # Which algorithm for proof-of-work to use
 ALGORITHM_SCRYPT      = 'scrypt'
 ALGORITHM_SHA256D     = 'sha256d'
+ALGORITHM_YESCRYPT    = 'yescrypt'
 
-ALGORITHMS = [ ALGORITHM_SCRYPT, ALGORITHM_SHA256D ]
+ALGORITHMS = [ ALGORITHM_SCRYPT, ALGORITHM_SHA256D, ALGORITHM_YESCRYPT ]
 
 
 # Verbosity and log level
@@ -69,6 +70,8 @@ LEVEL_ERROR     = 'error'
 SCRYPT_LIBRARY_C = 'scrypt (https://github.com/forrestv/p2pool)'
 SCRYPT_LIBRARIES = [ SCRYPT_LIBRARY_C ]
 
+YESCRYPT_LIBRARY_C      = 'https://password-hashing.net/submissions/yescrypt-v1.tar.gz'
+YESCRYPT_LIBRARIES = [ YESCRYPT_LIBRARY_C ]
 
 def log(message, level):
   '''Conditionally write a message to stdout based on command line options and level.'''
@@ -133,7 +136,7 @@ def set_scrypt_library():
   global SCRYPT_LIBRARY
   global scrypt_proof_of_work
 
-  import scrypt
+  import algos.scrypt.scrypt as scrypt
   scrypt_proof_of_work = scrypt.getPoWHash
   SCRYPT_LIBRARY = SCRYPT_LIBRARY_C
 
@@ -147,7 +150,22 @@ class Job(object):
            ~Alan Perlis
   '''
 
-  def __init__(self, job_id, prevhash, coinb1, coinb2, merkle_branches, version, nbits, ntime, target, extranounce1, extranounce2_size, proof_of_work):
+  def __init__(
+    self,
+    job_id,
+    prevhash,
+    coinb1,
+    coinb2,
+    merkle_branches,
+    version,
+    nbits,
+    ntime,
+    target,
+    extranounce1,
+    extranounce2_size,
+    proof_of_work,
+    max_nounce=0x7fffffff,
+  ):
 
     # Job parts from the mining.notify command
     self._job_id = job_id
@@ -158,6 +176,8 @@ class Job(object):
     self._version = version
     self._nbits = nbits
     self._ntime = ntime
+
+    self._max_nounce = max_nounce
 
     # Job information needed to mine from mining.subsribe
     self._target = target
@@ -217,7 +237,7 @@ class Job(object):
     self._done = True
 
 
-  def mine(self, nounce_start = 0, nounce_stride = 1):
+  def mine(self, nounce_start=0, nounce_stride=1):
     '''Returns an iterator that iterates over valid proof-of-work shares.
 
        This is a co-routine; that takes a LONG time; the calling thread should look like:
@@ -233,14 +253,14 @@ class Job(object):
     t0 = time.time()
 
     # @TODO: test for extranounce != 0... Do I reverse it or not?
-    for extranounce2 in xrange(0, 0x7fffffff):
+    for extranounce2 in xrange(self._max_nounce):
 
       # Must be unique for any given job id, according to http://mining.bitcoin.cz/stratum-mining/ but never seems enforced?
       extranounce2_bin = struct.pack('<I', extranounce2)
 
       merkle_root_bin = self.merkle_root_bin(extranounce2_bin)
       header_prefix_bin = swap_endian_word(self._version) + swap_endian_words(self._prevhash) + merkle_root_bin + swap_endian_word(self._ntime) + swap_endian_word(self._nbits)
-      for nounce in xrange(nounce_start, 0x7fffffff, nounce_stride):
+      for nounce in xrange(nounce_start, self._max_nounce, nounce_stride):
         # This job has been asked to stop
         if self._done:
           self._dt += (time.time() - t0)
@@ -274,6 +294,8 @@ class Job(object):
 # Subscription state
 class Subscription(object):
   '''Encapsulates the Subscription state from the JSON-RPC server'''
+
+  _max_nounce = None
 
   # Subclasses should override this
   def ProofOfWork(header):
@@ -342,18 +364,19 @@ class Subscription(object):
       raise self.StateException('Not subscribed')
 
     return Job(
-      job_id = job_id,
-      prevhash = prevhash,
-      coinb1 = coinb1,
-      coinb2 = coinb2,
-      merkle_branches = merkle_branches,
-      version = version,
-      nbits = nbits,
-      ntime = ntime,
-      target = self.target,
-      extranounce1 = self._extranounce1,
-      extranounce2_size = self.extranounce2_size,
-      proof_of_work = self.ProofOfWork
+      job_id=job_id,
+      prevhash=prevhash,
+      coinb1=coinb1,
+      coinb2=coinb2,
+      merkle_branches=merkle_branches,
+      version=version,
+      nbits=nbits,
+      ntime=ntime,
+      target=self.target,
+      extranounce1=self._extranounce1,
+      extranounce2_size=self.extranounce2_size,
+      proof_of_work=self.ProofOfWork,
+      max_nounce=self._max_nounce,
     )
 
 
@@ -364,7 +387,8 @@ class Subscription(object):
 class SubscriptionScrypt(Subscription):
   '''Subscription for Scrypt-based coins, like Litecoin.'''
 
-  ProofOfWork = lambda s, h: (scrypt_proof_of_work(h))
+  ProofOfWork = lambda s, h: scrypt_proof_of_work(h)
+  _max_nounce = 0x7fffffff
 
   def _set_target(self, target):
     # Why multiply by 2**16? See: https://litecoin.info/Mining_pool_comparison
@@ -377,8 +401,23 @@ class SubscriptionSHA256D(Subscription):
   ProofOfWork = sha256d
 
 
+class SubscriptionYescrypt(Subscription):
+  '''Subscription for Yescrypt-based coins.'''
+
+  import algos.yescrypt.yescrypt as yescrypt
+  ProofOfWork = yescrypt.getPoWHash
+  _max_nounce = 0x3fffff
+
+  def _set_target(self, target):
+    self._target = '%064x' % (target << 16)
+
+
 # Maps algorithms to their respective subscription objects
-SubscriptionByAlgorithm = { ALGORITHM_SCRYPT: SubscriptionScrypt, ALGORITHM_SHA256D: SubscriptionSHA256D }
+SubscriptionByAlgorithm = {
+  ALGORITHM_SCRYPT: SubscriptionScrypt,
+  ALGORITHM_SHA256D: SubscriptionSHA256D,
+  ALGORITHM_YESCRYPT: SubscriptionYescrypt,
+}
 
 
 class SimpleJsonRpcClient(object):
@@ -447,7 +486,10 @@ class SimpleJsonRpcClient(object):
       except self.RequestReplyWarning, e:
         output = e.message
         if e.request:
-          output += '\n  ' + e.request
+          try:
+            output += '\n  ' + e.request
+          except TypeError:
+            output += '\n  ' + str(e.request)
         output += '\n  ' + e.reply
         log(output, LEVEL_ERROR)
 
@@ -498,7 +540,7 @@ class Miner(SimpleJsonRpcClient):
 
   class MinerAuthenticationException(SimpleJsonRpcClient.RequestReplyException): pass
 
-  def __init__(self, url, username, password, algorithm = ALGORITHM_SCRYPT):
+  def __init__(self, url, username, password, algorithm=ALGORITHM_YESCRYPT):
     SimpleJsonRpcClient.__init__(self)
 
     self._url = url
