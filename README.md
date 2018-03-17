@@ -2,11 +2,29 @@ PyMiner
 =======
 
 This is a fork of Richard Moore's [nightminer](https://github.com/ricmoo/nightminer). It is a pure Python implementation of a Stratum CPU mining client.
-Jerônimo Cryptão has extended the miner to support multiple algorithms, and performed further refactoring, optimizations and refinements.
+
+[Jerônimo Cryptão](https://github.com/crypto-jeronimo) has extended the miner to support multiple algorithms, and performed further refactoring, optimizations and refinements.
 
 Currently supported algorithms:
 - Scrypt
 - Yescrypt
+
+Installation Instructions
+-------------------------
+
+For the Android instructions, please, refer to the corresponding section below.
+
+First, you need to install all required dependencies:
+```
+sudo apt-get -y install make
+```
+
+Then, simply run
+
+Installation Instructions (Android)
+-----------------------------------
+
+[Termux](https://play.google.com/store/apps/details?id=com.termux) from the Google Play store.
 
 Command Line Interface
 ----------------------
@@ -35,3 +53,7 @@ Command Line Interface
     Example:
         python pyminer.py -o stratum+tcp://foobar.com:3333 -u user -p passwd
 ```
+
+License
+-------
+

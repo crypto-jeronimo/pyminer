@@ -66,7 +66,7 @@ LEVEL_ERROR     = 'error'
 
 
 # These control which scrypt implementation to use
-SCRYPT_LIBRARY_C      = 'scrypt (https://github.com/forrestv/p2pool)'
+SCRYPT_LIBRARY_C = 'scrypt (https://github.com/forrestv/p2pool)'
 SCRYPT_LIBRARIES = [ SCRYPT_LIBRARY_C ]
 
 
