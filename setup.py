@@ -1,14 +1,14 @@
 import os
 from distutils.core import setup, Extension
 
-args = ['-O3']
-if os.environ.get('PLATFORM', '') == 'ARM':
-    args += ['-funroll-loops', '-fomit-frame-pointer']
 
 scrypt_module = Extension('scrypt',
                            sources = ['scryptmodule.c',
                                       'scrypt.c'],
-                           extra_compile_args=args,
+                           extra_compile_args=[
+                                '-O3', '-funroll-loops', '-fomit-frame-pointer']
+                                if os.environ.get('PLATFORM', '') == 'arm'
+                                else ['-O3'],
                            include_dirs=['.'])
 
 setup(name='scrypt',
