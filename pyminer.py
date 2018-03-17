@@ -38,7 +38,7 @@
 #   Scrypt Algorithm        - http://www.tarsnap.com/scrypt/scrypt.pdf
 #   Scrypt Implementation   - https://code.google.com/p/scrypt/source/browse/trunk/lib/crypto/crypto_scrypt-ref.c
 
-import base64, binascii, json, hashlib, hmac, math, socket, struct, sys, threading, time, urlparse
+import binascii, json, hashlib, socket, struct, sys, threading, time, urlparse
 
 # DayMiner (ah-ah-ah), fighter of the...
 USER_AGENT = "NightMiner"
