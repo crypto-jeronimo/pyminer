@@ -1,13 +1,17 @@
-pyminer-scrypt
-==========
+PyMiner
+=======
 
 This is a fork of Richard Moore's [nightminer](https://github.com/ricmoo/nightminer). It is a very simple pure Python implementation of a Stratum CPU mining client.
+
+Currently supported algorithms:
+- Scrypt
+- Yescrypt
 
 Command Line Interface
 ----------------------
 ```
     python pyminer.py [-h] [-o URL] [-u USERNAME] [-p PASSWORD]
-                         [-O USERNAME:PASSWORD] [-a {scrypt}] [-B] [-q]
+                         [-O USERNAME:PASSWORD] [-a {scrypt,yescrypt}] [-B] [-q]
                          [-P] [-d] [-v]
 
     -o URL, --url=              stratum mining server url
