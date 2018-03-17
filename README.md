@@ -1,7 +1,8 @@
 PyMiner
 =======
 
-This is a fork of Richard Moore's [nightminer](https://github.com/ricmoo/nightminer). It is a very simple pure Python implementation of a Stratum CPU mining client.
+This is a fork of Richard Moore's [nightminer](https://github.com/ricmoo/nightminer). It is a pure Python implementation of a Stratum CPU mining client.
+Jerônimo Cryptão has extended the miner to support multiple algorithms, and performed further refactoring, optimizations and refinements.
 
 Currently supported algorithms:
 - Scrypt
