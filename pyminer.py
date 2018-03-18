@@ -53,6 +53,18 @@ SCRYPT_LIBRARIES = [ SCRYPT_LIBRARY_C ]
 YESCRYPT_LIBRARY_C      = 'https://password-hashing.net/submissions/yescrypt-v1.tar.gz'
 YESCRYPT_LIBRARIES = [ YESCRYPT_LIBRARY_C ]
 
+WELCOME_MSG = ("If you have found this software useful and would like to support its future\n"
+               "development, please, feel free to donate:\n\n"
+               "   BTC: 1HKWV5t4KGUwybVHNUaaY9TXFSoBvoaSiP\n"
+               "   ETH: 0xF17e490B391E17BE2D14BFfaA831ab8966d2e689\n"
+               "   LTC: LNSEJzT8byYasZGd4f9c3DgtMbmexnXHdy\n"
+               "   BCH: 1AVXvPBrNdhTdwBN5VQT5LSHa7sEzMSia4\n"
+               "   XEM: NB3NDXRBOLEJLPT6MP6JAD4EZEOX5TFLDG3WR7JJ\n"
+               "   MONA: MPq54r8XTwtB2qmAeVqayy27ZCaPt845B6\n"
+               "   KOTO: k1GHJkvxLQocac94MFBbKAsdUvNbFdFWUyE\n"
+               "   NEET: NYaP7eEsDdALK5eHPZkYk1d8pBLyGvq9L1\n\n"
+               "Happy mining!")
+
 def log(message, level):
   '''Conditionally write a message to stdout based on command line options and level.'''
 
@@ -639,6 +651,10 @@ class Miner(SimpleJsonRpcClient):
     thread.daemon = True
     thread.start()
 
+  @staticmethod
+  def welcome_msg():
+    log(WELCOME_MSG, LEVEL_INFO)
+
 
   def serve_forever(self):
     '''Begins the miner. This method does not return.'''
@@ -647,6 +663,8 @@ class Miner(SimpleJsonRpcClient):
     url = urlparse.urlparse(self.url)
     hostname = url.hostname or ''
     port = url.port or 9333
+
+    self.welcome_msg()
 
     log('Starting server on %s:%d' % (hostname, port), LEVEL_INFO)
 
@@ -711,7 +729,11 @@ if __name__ == '__main__':
   import argparse
 
   # Parse the command line
-  parser = argparse.ArgumentParser(description = "CPU-Miner for Cryptocurrency using the stratum protocol")
+  parser = argparse.ArgumentParser(description="PyMiner is a Stratum CPU mining client. "
+                                               "If you like this piece of software, please "
+                                               "consider supporting its future development via "
+                                               "donating to one of the addresses indicated in the "
+                                               "README.md file")
 
   parser.add_argument('-o', '--url', help = 'stratum mining server url (eg: stratum+tcp://foobar.com:3333)')
   parser.add_argument('-u', '--user', dest = 'username', default = '', help = 'username for mining server', metavar = "USERNAME")

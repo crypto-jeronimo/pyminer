@@ -120,3 +120,5 @@ development, please, feel free to donate:
 
 After all, those morning cups of coffee need to come from somewhere, in order to
 enable writing efficient code :)
+
+Happy mining!
