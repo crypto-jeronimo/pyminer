@@ -46,15 +46,13 @@ Particularly, PyMiner has been successfully tested on the following apps:
 
 1. Termux
 ```
-chmod +x ./build-android-termux.sh ./deps-android-termux.sh
-./deps-android-termux.sh
+chmod +x ./build-android-termux.sh
 ./build-android-termux.sh
 ```
 
 2. GNURoot Debian
 ```
-chmod +x ./build-android-gnuroot.sh ./deps-android-gnuroot.sh
-./deps-android-gnuroot.sh
+chmod +x ./build-android-gnuroot.sh
 ./build-android-gnuroot.sh
 ```
 

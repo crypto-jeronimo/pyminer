@@ -2,4 +2,4 @@
 
 pkg install -y make
 make deps-android-termux
-make install-android-termux
+CFLAGS="$CFLAGS" make install-android-termux
