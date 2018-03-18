@@ -2,10 +2,15 @@ import os
 from setuptools import setup, Extension
 
 
-extra_compile_args = (
-                      ['-O3', '-funroll-loops', '-fomit-frame-pointer']
-                      if os.environ.get('PLATFORM', '') == 'arm'
-                      else ['-O3'])
+CFLAGS = os.environ.get('CFLAGS', '').strip()
+
+if CFLAGS:
+  extra_compile_args = CFLAGS.split()
+else:
+  extra_compile_args = (
+                        ['-O3', '-funroll-loops', '-fomit-frame-pointer']
+                        if os.environ.get('PLATFORM', '') == 'arm'
+                        else ['-O3'])
 
 scrypt_module = Extension('scrypt',
                           sources=['./algos/scrypt/scryptmodule.c',

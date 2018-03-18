@@ -17,12 +17,13 @@ For the Android instructions, please, refer to the corresponding section below.
 
 For an easy install:
 ```
-chmod +x ./build.sh
-sudo ./build.sh
+chmod +x ./build.sh ./deps.sh
+sudo ./deps.sh
+./build.sh
 ```
 
-For installation on ARM-based devices, please replace `build.sh` with `build-arm.sh`
-in the lines above.
+For installation on ARM-based devices, please replace `build.sh` and `deps.sh`
+with `build-arm.sh` and `deps-arm.sh` in the lines above.
 
 **Note:** Superuser privileges are _only_ required for installation of the `make`
 package, in case it's not been installed on your system already.
@@ -45,14 +46,28 @@ Particularly, PyMiner has been successfully tested on the following apps:
 
 1. Termux
 ```
-chmod +x ./build-android-termux.sh
+chmod +x ./build-android-termux.sh ./deps-android-termux.sh
+./deps-android-termux.sh
 ./build-android-termux.sh
 ```
 
 2. GNURoot Debian
 ```
-chmod +x ./build-android-gnuroot.sh
+chmod +x ./build-android-gnuroot.sh ./deps-android-gnuroot.sh
+./deps-android-gnuroot.sh
 ./build-android-gnuroot.sh
+```
+
+Advanced Installation
+---------------------
+
+You can alternatively supply custom compilation arguments for the C bindings of
+algorithms supported by PyMiner, via the `CFLAGS` environment variable (please,
+note the double quotes), e.g.:
+```
+chmod +x ./build-arm.sh ./deps-arm.sh
+sudo ./deps-arm.sh
+CFLAGS="-O3 -funroll-loops -fomit-frame-pointer" sudo ./build-arm.sh
 ```
 
 Command Line Interface
