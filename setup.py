@@ -8,22 +8,22 @@ extra_compile_args = (
                       else ['-O3'])
 
 scrypt_module = Extension('scrypt',
-                           sources=['./algos/scrypt/scryptmodule.c',
+                          sources=['./algos/scrypt/scryptmodule.c',
                                     './algos/scrypt/scrypt.c'],
-                           extra_compile_args=extra_compile_args,
-                           include_dirs=['./algos/scrypt'])
+                          extra_compile_args=extra_compile_args,
+                          include_dirs=['./algos/scrypt'])
 
 yescrypt_module = Extension('yescrypt',
-                            sources = ['./algos/yescrypt/yescrypt.c'],
+                            sources=['./algos/yescrypt/yescrypt.c'],
                             extra_compile_args=extra_compile_args,
                             include_dirs=['./algos/yescrypt'])
 
 setup(name='scrypt',
-       version='1.0',
-       description='Bindings for scrypt proof of work',
-       ext_modules=[scrypt_module])
+      version='1.0',
+      description='Bindings for scrypt proof of work',
+      ext_modules=[scrypt_module])
 
 setup(name='yescrypt',
-       version='1.0',
-       description='Bindings for yescrypt proof of work',
-       ext_modules=[yescrypt_module])
+      version='1.0',
+      description='Bindings for yescrypt proof of work',
+      ext_modules=[yescrypt_module])
