@@ -20,31 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-
-# What is this?
-#
-# NightMiner is meant to be a simple, one-file implementation of a stratum CPU
-# miner for CryptoCurrency written in Python favouring understandability
-# over performance.
-#
-# It was originally designed for scrypt-based coins, and has been extended to
-# include support for sha256d.
-#
-# Try running nightminer with the -P and -d to see protocol and debug details
-#
-# Required reading:
-#   Block Hashing Algorithm - https://litecoin.info/Block_hashing_algorithm
-#   Stratum Mining Protocol - http://mining.bitcoin.cz/stratum-mining/
-#   Scrypt Algorithm        - http://www.tarsnap.com/scrypt/scrypt.pdf
-#   Scrypt Implementation   - https://code.google.com/p/scrypt/source/browse/trunk/lib/crypto/crypto_scrypt-ref.c
-
 import binascii, json, hashlib, socket, struct, sys, threading, time, urlparse
 
-# DayMiner (ah-ah-ah), fighter of the...
-USER_AGENT = "NightMiner"
-VERSION = [0, 1]
 
-# You're a master of Karate and friendship for everyone.
+USER_AGENT = "PyMiner"
+VERSION = [0, 1]
 
 
 # Which algorithm for proof-of-work to use
