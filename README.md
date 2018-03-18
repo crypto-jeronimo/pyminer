@@ -96,6 +96,10 @@ Command Line Interface
         python pyminer.py -o stratum+tcp://foobar.com:3333 -u user -p passwd
 ```
 
+Please, note that for Android usage you need to change `python` to:
+- GNURoot Debian: `python2.7`
+- Termux: `python2`
+
 License
 -------
 
