@@ -10,8 +10,8 @@ Currently supported algorithms:
 - `sha256d`: SHA256d
 - `yescrypt`: Yescrypt
 
-Installation Instructions
--------------------------
+Installation
+------------
 
 For the Android instructions, please, refer to the corresponding section below.
 
@@ -29,8 +29,8 @@ with `build-arm.sh` and `deps-arm.sh` in the lines above.
 package, in case it's not been installed on your system already.
 
 
-Installation Instructions (Android)
------------------------------------
+Installation (Android)
+----------------------
 
 **Note:** PyMiner currently **does not** support dynamic CPU modification of current
 utilization, based on physical measurements such as temperature. This means that
@@ -68,8 +68,8 @@ sudo ./deps-arm.sh
 CFLAGS="-O3 -funroll-loops -fomit-frame-pointer" sudo ./build-arm.sh
 ```
 
-Command Line Interface
-----------------------
+Usage
+-----
 ```
     python pyminer.py [-h] [-o URL] [-u USERNAME] [-p PASSWORD]
                          [-O USERNAME:PASSWORD] [-a ALGO] [-B] [-q]
