@@ -15,16 +15,18 @@ Installation Instructions
 
 For the Android instructions, please, refer to the corresponding section below.
 
-First, you need to install all required dependencies:
+For an easy install:
 ```
-sudo apt-get -y install make
-make deps
+chmod +x ./build.sh
+sudo ./build.sh
 ```
 
-Then, simply run:
-```
-make install
-```
+For installation on ARM-based devices, please replace `build.sh` with `build-arm.sh`
+in the lines above.
+
+**Note:** Superuser privileges are _only_ required for installation of the `make`
+package, in case it's not been installed on your system already.
+
 
 Installation Instructions (Android)
 -----------------------------------
@@ -40,6 +42,18 @@ obtain a suitable terminal emulation software from the official Google Play stor
 Particularly, PyMiner has been successfully tested on the following apps:
 - [Termux](https://play.google.com/store/apps/details?id=com.termux)
 - [GNURoot Debian](https://play.google.com/store/apps/details?id=com.gnuroot.debian)
+
+1. Termux
+```
+chmod +x ./build-android-termux.sh
+./build-android-termux.sh
+```
+
+2. GNURoot Debian
+```
+chmod +x ./build-android-gnuroot.sh
+./build-android-gnuroot.sh
+```
 
 Command Line Interface
 ----------------------
