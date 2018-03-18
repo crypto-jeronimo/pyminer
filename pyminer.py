@@ -136,7 +136,7 @@ def set_scrypt_library():
   global SCRYPT_LIBRARY
   global scrypt_proof_of_work
 
-  import algos.scrypt.scrypt as scrypt
+  import scrypt
   scrypt_proof_of_work = scrypt.getPoWHash
   SCRYPT_LIBRARY = SCRYPT_LIBRARY_C
 
@@ -404,7 +404,7 @@ class SubscriptionSHA256D(Subscription):
 class SubscriptionYescrypt(Subscription):
   '''Subscription for Yescrypt-based coins.'''
 
-  import algos.yescrypt.yescrypt as yescrypt
+  import yescrypt
   ProofOfWork = yescrypt.getPoWHash
   _max_nounce = 0x3fffff
 
