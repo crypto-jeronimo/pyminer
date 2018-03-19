@@ -100,10 +100,26 @@ Please, note that for Android usage you need to change `python` to:
 - GNURoot Debian: `python2.7`
 - Termux: `python2`
 
+
+Roadmap
+-------
+
+Next steps include but are not limited to:
+- enable support for more algorithms: Yescrypt R8, Yescrypt R16, CryptoNight, Argon2d, Argon2i
+- further optimization via Cython
+- further optimization via automated compilation flag detection
+
+Issues
+------
+
+Please, report any issues in the [Issues](LICENSE.txt) section.
+
+
 License
 -------
 
 Please, see the [LICENSE](LICENSE.txt) document.
+
 
 Donations
 ---------
