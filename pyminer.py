@@ -153,10 +153,10 @@ class Job(object):
     nbits,
     ntime,
     target,
-    extranounce1,
-    extranounce2_size,
+    extranonce1,
+    extranonce2_size,
     proof_of_work,
-    max_nounce=0x7fffffff,
+    max_nonce=0x7fffffff,
   ):
 
     # Job parts from the mining.notify command
@@ -169,12 +169,12 @@ class Job(object):
     self._nbits = nbits
     self._ntime = ntime
 
-    self._max_nounce = max_nounce
+    self._max_nonce = max_nonce
 
     # Job information needed to mine from mining.subsribe
     self._target = target
-    self._extranounce1 = extranounce1
-    self._extranounce2_size = extranounce2_size
+    self._extranonce1 = extranonce1
+    self._extranonce2_size = extranonce2_size
 
     # Proof of work algorithm
     self._proof_of_work = proof_of_work
@@ -197,8 +197,8 @@ class Job(object):
   ntime = property(lambda s: s._ntime)
 
   target = property(lambda s: s._target)
-  extranounce1 = property(lambda s: s._extranounce1)
-  extranounce2_size = property(lambda s: s._extranounce2_size)
+  extranonce1 = property(lambda s: s._extranonce1)
+  extranonce2_size = property(lambda s: s._extranonce2_size)
 
   proof_of_work = property(lambda s: s._proof_of_work)
 
@@ -211,10 +211,10 @@ class Job(object):
     return self._hash_count / self._dt
 
 
-  def merkle_root_bin(self, extranounce2_bin):
+  def merkle_root_bin(self, extranonce2_bin):
     '''Builds a merkle root from the merkle tree'''
 
-    coinbase_bin = unhexlify(self._coinb1) + unhexlify(self._extranounce1) + extranounce2_bin + unhexlify(self._coinb2)
+    coinbase_bin = unhexlify(self._coinb1) + unhexlify(self._extranonce1) + extranonce2_bin + unhexlify(self._coinb2)
     coinbase_hash_bin = sha256d(coinbase_bin)
 
     merkle_root = coinbase_hash_bin
@@ -229,7 +229,7 @@ class Job(object):
     self._done = True
 
 
-  def mine(self, nounce_start=0, nounce_stride=1):
+  def mine(self, nonce_start=0, nonce_stride=1):
     '''Returns an iterator that iterates over valid proof-of-work shares.
 
        This is a co-routine; that takes a LONG time; the calling thread should look like:
@@ -237,38 +237,38 @@ class Job(object):
          for result in job.mine(self):
            submit_work(result)
 
-       nounce_start and nounce_stride are useful for multi-processing if you would like
-       to assign each process a different starting nounce (0, 1, 2, ...) and a stride
+       nonce_start and nonce_stride are useful for multi-processing if you would like
+       to assign each process a different starting nonce (0, 1, 2, ...) and a stride
        equal to the number of processes.
     '''
 
     t0 = time.time()
 
-    # @TODO: test for extranounce != 0... Do I reverse it or not?
-    for extranounce2 in xrange(self._max_nounce):
+    # @TODO: test for extranonce != 0... Do I reverse it or not?
+    for extranonce2 in xrange(self._max_nonce):
 
       # Must be unique for any given job id, according to http://mining.bitcoin.cz/stratum-mining/ but never seems enforced?
-      extranounce2_bin = struct.pack('<I', extranounce2)
+      extranonce2_bin = struct.pack('<I', extranonce2)
 
-      merkle_root_bin = self.merkle_root_bin(extranounce2_bin)
+      merkle_root_bin = self.merkle_root_bin(extranonce2_bin)
       header_prefix_bin = swap_endian_word(self._version) + swap_endian_words(self._prevhash) + merkle_root_bin + swap_endian_word(self._ntime) + swap_endian_word(self._nbits)
-      for nounce in xrange(nounce_start, self._max_nounce, nounce_stride):
+      for nonce in xrange(nonce_start, self._max_nonce, nonce_stride):
         # This job has been asked to stop
         if self._done:
           self._dt += (time.time() - t0)
           raise StopIteration()
 
         # Proof-of-work attempt
-        nounce_bin = struct.pack('<I', nounce)
-        pow = self.proof_of_work(header_prefix_bin + nounce_bin)[::-1].encode('hex')
+        nonce_bin = struct.pack('<I', nonce)
+        pow = self.proof_of_work(header_prefix_bin + nonce_bin)[::-1].encode('hex')
 
         # Did we reach or exceed our target?
         if pow <= self.target:
           result = dict(
             job_id = self.id,
-            extranounce2 = hexlify(extranounce2_bin),
+            extranonce2 = hexlify(extranonce2_bin),
             ntime = str(self._ntime),                    # Convert to str from json unicode
-            nounce = hexlify(nounce_bin[::-1])
+            nonce = hexlify(nonce_bin[::-1])
           )
           self._dt += (time.time() - t0)
 
@@ -280,14 +280,14 @@ class Job(object):
 
 
   def __str__(self):
-    return '<Job id=%s prevhash=%s coinb1=%s coinb2=%s merkle_branches=%s version=%s nbits=%s ntime=%s target=%s extranounce1=%s extranounce2_size=%d>' % (self.id, self.prevhash, self.coinb1, self.coinb2, self.merkle_branches, self.version, self.nbits, self.ntime, self.target, self.extranounce1, self.extranounce2_size)
+    return '<Job id=%s prevhash=%s coinb1=%s coinb2=%s merkle_branches=%s version=%s nbits=%s ntime=%s target=%s extranonce1=%s extranonce2_size=%d>' % (self.id, self.prevhash, self.coinb1, self.coinb2, self.merkle_branches, self.version, self.nbits, self.ntime, self.target, self.extranonce1, self.extranonce2_size)
 
 
 # Subscription state
 class Subscription(object):
   '''Encapsulates the Subscription state from the JSON-RPC server'''
 
-  _max_nounce = None
+  _max_nonce = None
 
   # Subclasses should override this
   def ProofOfWork(header):
@@ -298,8 +298,8 @@ class Subscription(object):
   def __init__(self):
     self._id = None
     self._difficulty = None
-    self._extranounce1 = None
-    self._extranounce2_size = None
+    self._extranonce1 = None
+    self._extranonce2_size = None
     self._target = None
     self._worker_name = None
 
@@ -312,8 +312,8 @@ class Subscription(object):
   difficulty = property(lambda s: s._difficulty)
   target = property(lambda s: s._target)
 
-  extranounce1 = property(lambda s: s._extranounce1)
-  extranounce2_size = property(lambda s: s._extranounce2_size)
+  extranonce1 = property(lambda s: s._extranonce1)
+  extranonce2_size = property(lambda s: s._extranonce2_size)
 
 
   def set_worker_name(self, worker_name):
@@ -340,13 +340,13 @@ class Subscription(object):
     self._set_target(target)
 
 
-  def set_subscription(self, subscription_id, extranounce1, extranounce2_size):
+  def set_subscription(self, subscription_id, extranonce1, extranonce2_size):
     if self._id is not None:
       raise self.StateException('Already subscribed')
 
     self._id = subscription_id
-    self._extranounce1 = extranounce1
-    self._extranounce2_size = extranounce2_size
+    self._extranonce1 = extranonce1
+    self._extranonce2_size = extranonce2_size
 
 
   def create_job(self, job_id, prevhash, coinb1, coinb2, merkle_branches, version, nbits, ntime):
@@ -365,22 +365,22 @@ class Subscription(object):
       nbits=nbits,
       ntime=ntime,
       target=self.target,
-      extranounce1=self._extranounce1,
-      extranounce2_size=self.extranounce2_size,
+      extranonce1=self._extranonce1,
+      extranonce2_size=self.extranonce2_size,
       proof_of_work=self.ProofOfWork,
-      max_nounce=self._max_nounce,
+      max_nonce=self._max_nonce,
     )
 
 
   def __str__(self):
-    return '<Subscription id=%s, extranounce1=%s, extranounce2_size=%d, difficulty=%d worker_name=%s>' % (self.id, self.extranounce1, self.extranounce2_size, self.difficulty, self.worker_name)
+    return '<Subscription id=%s, extranonce1=%s, extranonce2_size=%d, difficulty=%d worker_name=%s>' % (self.id, self.extranonce1, self.extranonce2_size, self.difficulty, self.worker_name)
 
 
 class SubscriptionScrypt(Subscription):
   '''Subscription for Scrypt-based coins, like Litecoin.'''
 
   ProofOfWork = lambda s, h: scrypt_proof_of_work(h)
-  _max_nounce = 0x7fffffff
+  _max_nonce = 0x7fffffff
 
   def _set_target(self, target):
     # Why multiply by 2**16? See: https://litecoin.info/Mining_pool_comparison
@@ -398,7 +398,7 @@ class SubscriptionYescrypt(Subscription):
 
   import yescrypt
   ProofOfWork = yescrypt.getPoWHash
-  _max_nounce = 0x3fffff
+  _max_nonce = 0x3fffff
 
   def _set_target(self, target):
     self._target = '%064x' % (target << 16)
@@ -582,9 +582,9 @@ class Miner(SimpleJsonRpcClient):
         if 'result' not in reply or len(reply['result']) != 3 or len(reply['result'][0]) != 2:
           raise self.MinerWarning('Reply to mining.subscribe is malformed', reply, request)
 
-        ((mining_notify, subscription_id), extranounce1, extranounce2_size) = reply['result']
+        ((mining_notify, subscription_id), extranonce1, extranonce2_size) = reply['result']
 
-        self._subscription.set_subscription(subscription_id, extranounce1, extranounce2_size)
+        self._subscription.set_subscription(subscription_id, extranonce1, extranonce2_size)
 
         log('Subscribed: subscription_id=%s' % subscription_id, LEVEL_DEBUG)
 
@@ -640,7 +640,7 @@ class Miner(SimpleJsonRpcClient):
     def run(job):
       try:
         for result in job.mine():
-          params = [ self._subscription.worker_name ] + [ result[k] for k in ('job_id', 'extranounce2', 'ntime', 'nounce') ]
+          params = [ self._subscription.worker_name ] + [ result[k] for k in ('job_id', 'extranonce2', 'ntime', 'nonce') ]
           self.send(method = 'mining.submit', params = params)
           log("Found share: " + str(params), LEVEL_INFO)
         log("Hashrate: %s" % human_readable_hashrate(job.hashrate), LEVEL_INFO)
@@ -690,8 +690,8 @@ def test_subscription():
   # Set up the subscription
   reply = json.loads('{"error": null, "id": 1, "result": [["mining.notify", "ae6812eb4cd7735a302a8a9dd95cf71f"], "f800880e", 4]}')
   log('TEST: %r' % reply, LEVEL_DEBUG)
-  ((mining_notify, subscription_id), extranounce1, extranounce2_size) = reply['result']
-  subscription.set_subscription(subscription_id, extranounce1, extranounce2_size)
+  ((mining_notify, subscription_id), extranonce1, extranonce2_size) = reply['result']
+  subscription.set_subscription(subscription_id, extranonce1, extranonce2_size)
 
   # Set the difficulty
   reply = json.loads('{"params": [32], "id": null, "method": "mining.set_difficulty"}')
@@ -715,11 +715,11 @@ def test_subscription():
   )
 
   # Scan that job (if I broke something, this will run for a long time))
-  for result in job.mine(nounce_start = 1210450368 - 3):
+  for result in job.mine(nonce_start = 1210450368 - 3):
     log('TEST: found share - %r' % repr(result), LEVEL_DEBUG)
     break
 
-  valid = { 'ntime': '52c7b81a', 'nounce': '482601c0', 'extranounce2': '00000000', 'job_id': u'1db7' }
+  valid = { 'ntime': '52c7b81a', 'nonce': '482601c0', 'extranonce2': '00000000', 'job_id': u'1db7' }
   log('TEST: Correct answer %r' % valid, LEVEL_DEBUG)
 
 
